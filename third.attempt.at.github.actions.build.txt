@@ -1,0 +1,84 @@
+We hand this to Gemini, and again we make sure to drag in the latest build.yml as well.
+
+BUILD ERRORS
+
+Linux:
+
+   Compiling mime v0.3.17
+   Compiling byte-unit v5.2.5
+   Compiling app v0.1.0 (/home/runner/work/tauri.robot.shooting.game/tauri.robot.shooting.game/src-tauri)
+   Compiling fern v0.7.1
+    Finished `release` profile [optimized] target(s) in 2m 43s
+       Built application at: /home/runner/work/tauri.robot.shooting.game/tauri.robot.shooting.game/src-tauri/target/release/app
+        Info Patching /home/runner/work/tauri.robot.shooting.game/tauri.robot.shooting.game/src-tauri/target/release/app with bundle type information: deb
+    Bundling Robot Shooting Game_0.1.0_amd64.deb 
+    
+( lots more not shown here...skipping down to near end of error)
+
+/home/runner/work/tauri.robot.shooting.game/tauri.robot.shooting.game/src-tauri/target/release/bundle/appimage/Robot Shooting Game_0.1.0_amd64.AppImage
+Looking for a draft release with tag app-v0.1.0...
+Couldn't find release with tag app-v0.1.0. Creating one.
+Error: Resource not accessible by integration - https://docs.github.com/rest/releases/releases#create-a-release
+
+
+Windows:
+
+   Compiling utf8-width v0.1.8
+   Compiling mime v0.3.17
+   Compiling byte-unit v5.2.5
+   Compiling app v0.1.0 (D:\a\tauri.robot.shooting.game\tauri.robot.shooting.game\src-tauri)
+   Compiling fern v0.7.1
+    Finished `release` profile [optimized] target(s) in 4m 21s
+       Built application at: D:\a\tauri.robot.shooting.game\tauri.robot.shooting.game\src-tauri\target\release\app.exe
+        Info Patching D:\a\tauri.robot.shooting.game\tauri.robot.shooting.game\src-tauri\target\release\app.exe with bundle type information: msi
+        Info Verifying wix package
+ Downloading https://github.com/wixtoolset/wix3/releases/download/wix3141rtm/wix314-binaries.zip
+
+
+( lots more not shown here...skipping down to near end of error)
+
+D:\a\tauri.robot.shooting.game\tauri.robot.shooting.game\src-tauri\target\release\bundle\nsis\Robot Shooting Game_0.1.0_x64-setup.exe
+Looking for a draft release with tag app-v0.1.0...
+Couldn't find release with tag app-v0.1.0. Creating one.
+Error: Resource not accessible by integration - https://docs.github.com/rest/releases/releases#create-a-release
+
+
+===============================================================
+Gemini Responses:
+
+The Good News: Your App Built Perfectly!
+If you look closely at the logs, both the Linux and Windows builds successfully compiled the Rust backend and generated the final executable files (.deb, .AppImage, .msi, .exe). The heavy lifting is completely done.
+
+The Problem: GitHub Security Permissions
+The error Resource not accessible by integration happened at the very last second.
+
+The Fix
+You just need to add exactly two lines to your build.yml file right after the on: block to grant the workflow write permissions.
+
+
+O.M.G, S.M.H  (sigh)
+
+
+
+Gemini gave us ANOTHER updated copy of build.yml, so we repeat the process.
+
+After we replace with new content, we have
+to do git commands so that we can sync our
+local changes with GitHub, and that will
+fire off a new Actions build.
+
+$ git status
+
+$ git add .
+
+$ git commit --message 'updated build.yml'
+
+$ git push
+
+Then we go check GitHub Actions again.
+
+
+
+
+
+

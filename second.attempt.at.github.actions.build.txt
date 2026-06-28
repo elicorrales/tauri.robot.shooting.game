@@ -1,0 +1,75 @@
+We are AGAIN going to hand Gemini the errors, but this time we are also going
+to drag over the build.yml file because forgets.
+
+THE BUILD ERRORS:
+
+The Linux  Build ERRORS:
+
+(at Build and Package Tauri App)
+
+Run tauri-apps/tauri-action@v0
+  with:
+    tagName: app-v0.1.0
+    releaseName: Robot Shooting Game v0.1.0
+    releaseBody: Automated build generated via GitHub Actions.
+    releaseDraft: true
+    prerelease: false
+    projectPath: .
+    includeDebug: false
+    includeRelease: true
+    includeUpdaterJson: true
+    updaterJsonKeepUniversal: false
+    isGitea: false
+    uploadPlainBinary: false
+    generateReleaseNotes: false
+  env:
+    CARGO_HOME: /home/runner/.cargo
+    CARGO_INCREMENTAL: 0
+    CARGO_TERM_COLOR: always
+    GITHUB_TOKEN: ***
+Error: ENOENT: no such file or directory, open '/home/runner/work/tauri.robot.shooting.game/tauri.robot.shooting.game/Cargo.toml'
+
+
+THE WINDOWS BUILD ERRORS:
+
+(at Build and Package Tauri App)
+
+Run tauri-apps/tauri-action@v0
+  with:
+    tagName: app-v0.1.0
+    releaseName: Robot Shooting Game v0.1.0
+    releaseBody: Automated build generated via GitHub Actions.
+    releaseDraft: true
+    prerelease: false
+    projectPath: .
+    includeDebug: false
+    includeRelease: true
+    includeUpdaterJson: true
+    updaterJsonKeepUniversal: false
+    isGitea: false
+    uploadPlainBinary: false
+    generateReleaseNotes: false
+  env:
+    CARGO_HOME: C:\Users\runneradmin\.cargo
+    CARGO_INCREMENTAL: 0
+    CARGO_TERM_COLOR: always
+    GITHUB_TOKEN: ***
+Error: ENOENT: no such file or directory, open 'D:\a\tauri.robot.shooting.game\tauri.robot.shooting.game\Cargo.toml'
+
+
+Gemini gave us ANOTHER updated copy of build.yml, so we repeat the process.
+
+After we replace with new content, we have
+to do git commands so that we can sync our
+local changes with GitHub, and that will
+fire off a new Actions build.
+
+$ git status
+
+$ git add .
+
+$ git commit --message 'updated build.yml'
+
+$ git push
+
+Then we go check GitHub Actions again.

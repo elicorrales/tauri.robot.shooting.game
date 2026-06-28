@@ -1,5 +1,8 @@
 We handed Gemini (in same chat where we started) the results of 1st failed build.
 See file first.attempt.at.github.actions.build.txt.
+We did get further along.
 See file second.attempt.at.github.actions.build.txt.
+This time we really seemed to get further.
+See file third.attempt.at.github.actions.build.txt.
 
 
