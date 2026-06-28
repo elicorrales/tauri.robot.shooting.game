@@ -59,7 +59,7 @@ robot-shooting-game/
 │   ├── robot.game.robot.functions.js 
 │   ├── robot.game.modal.functions.js 
 │   └── Mouse-Cursor-Pointer.svg    
-|__.gitignore  
+|__.gitignore.  
 └──ta tauri.conf.json                   <-- The basic configuration for your app window
 
 
