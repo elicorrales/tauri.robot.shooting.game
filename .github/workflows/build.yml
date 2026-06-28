@@ -1,0 +1,64 @@
+name: "Build and Release Tauri App"
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch: 
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [ubuntu-latest, windows-latest]
+
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+
+      # Linux requires specific UI libraries to compile Tauri apps
+      - name: Install Linux dependencies
+        if: matrix.platform == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.0-dev libappindicator3-dev librsvg2-dev patchelf
+
+      # This is the magic step: it generates all the local Tauri/Rust boilerplate 
+      # on the fly, so you don't have to keep it in your repository.
+      - name: Generate Tauri Boilerplate
+        shell: bash
+        run: |
+          npm init -y
+          npm install @tauri-apps/cli
+          npm pkg set scripts.tauri="tauri"
+          npx tauri init --app-name robot-shooting-game --window-title "Robot Shooting Game" --dist-dir "../src" --dev-path "http://localhost:1420"
+          cp tauri.conf.json src-tauri/tauri.conf.json
+
+      # Optional: Statically link the C runtime on Windows to reduce target dependencies
+      - name: Set Windows Rust Flags
+        if: matrix.platform == 'windows-latest'
+        run: echo "RUSTFLAGS=-C target-feature=+crt-static" >> $GITHUB_ENV
+
+      # This official action handles the actual build command
+      # and packages the results into a GitHub Draft Release.
+      - name: Build and Package Tauri App
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tagName: app-v0.1.0
+          releaseName: 'Robot Shooting Game v0.1.0'
+          releaseBody: 'Automated build generated via GitHub Actions.'
+          releaseDraft: true
+          prerelease: false
+          
+

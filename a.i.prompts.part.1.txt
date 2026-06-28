@@ -1,0 +1,15 @@
+Can you read all these files. Is it possible to create a GitHub
+repository, and use GitHub Actions to build a Tauri app that
+wraps these files.
+
+Will GitHub Actions runners have everything required.. that
+I don't have to include in my repo, just correctly configured
+build file etc?
+
+For Windows, once I have the downloadable app, is it expected
+that the target have Webview2 and possibly a Microsoft redistributable library? 
+Is there another way to package the result, with
+less dependencies on the target system?
+
+For Linux, is it possible to create an AppImage, or Flatpak
+or Snap?

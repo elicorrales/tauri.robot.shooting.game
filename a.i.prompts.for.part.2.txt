@@ -1,0 +1,202 @@
+TO GEMINI:
+
+give me a text drawing, much like if i did "tree" in linux,
+that should be how a tauri project or repo structure would
+look like in GitHub, and place file names in the correct
+places in the repo structure, and also tell me where
+my own project files would go.
+
+====================================================================
+
+Gemini's first response (below) was unacceptable. WHen interacting with A.I.,
+stand your ground and do NOT just accept the first answer they give you.
+
+You say you want to do the absolute minimum work, and you want this for
+(name your OS here)
+
+my-tauri-game-repo/
+├── .github/
+│   └── workflows/
+│       └── tauri-build.yml           <-- The GitHub Actions file that automates the build
+├── src/                              <-- YOUR PROJECT FILES GO HERE
+│   ├── robot.game.html               
+│   ├── robot.game.css                
+│   ├── robot.game.sound.js           
+│   ├── robot.game.helper.functions.js
+│   ├── robot.game.player.functions.js
+│   ├── robot.game.robot.functions.js 
+│   ├── robot.game.modal.functions.js 
+│   └── Mouse-Cursor-Pointer.svg      
+├── src-tauri/                        <-- THE TAURI/RUST BACKEND
+│   ├── icons/                        <-- Your app's desktop icons go here
+│   │   ├── icon.ico                  
+│   │   ├── icon.icns                 
+│   │   └── icon.png                  
+│   ├── src/                          
+│   │   └── main.rs                   <-- The minimal Rust entry point (auto-generated)
+│   ├── build.rs                      <-- Rust build script (auto-generated)
+│   ├── Cargo.toml                    <-- Rust dependencies list
+│   └── tauri.conf.json               <-- Tauri settings (window size, app name, etc.)
+├── .gitignore                        <-- Tells Git to ignore compiled/temp files
+└── package.json                      <-- Tells GitHub Actions how to run the Tauri CLI
+
+
+====================================================================
+
+Finally got Gemini down to a more reasonable answer:
+
+
+robot-shooting-game/
+├── .github/
+│   └── worworkflows/
+│       └── build.yml                 <-- The script that tells GitHub to build the app
+├── src/                              <-- YOUR PROJECT FILES
+│   ├── robot.game.html               
+│   ├── robot.game.css                
+│   ├── robot.game.sound.js           
+│   ├── robot.game.helper.functions.js
+│   ├── robot.game.player.functions.js
+│   ├── robot.game.robot.functions.js 
+│   ├── robot.game.modal.functions.js 
+│   └── Mouse-Cursor-Pointer.svg    
+|__.gitignore  
+└──ta tauri.conf.json                   <-- The basic configuration for your app window
+
+
+====================================================================
+So next we ask Gemini for the actual file content.
+
+====================================================================
+FILE: .github/workflows/build.yml
+
+name: "Build and Release Tauri App"
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch: 
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [ubuntu-latest, windows-latest]
+
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+
+      # Linux requires specific UI libraries to compile Tauri apps
+      - name: Install Linux dependencies
+        if: matrix.platform == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.0-dev libappindicator3-dev librsvg2-dev patchelf
+
+      # This is the magic step: it generates all the local Tauri/Rust boilerplate 
+      # on the fly, so you don't have to keep it in your repository.
+      - name: Generate Tauri Boilerplate
+        shell: bash
+        run: |
+          npm init -y
+          npm install @tauri-apps/cli
+          npm pkg set scripts.tauri="tauri"
+          npx tauri init --app-name robot-shooting-game --window-title "Robot Shooting Game" --dist-dir "../src" --dev-path "http://localhost:1420"
+          cp tauri.conf.json src-tauri/tauri.conf.json
+
+      # Optional: Statically link the C runtime on Windows to reduce target dependencies
+      - name: Set Windows Rust Flags
+        if: matrix.platform == 'windows-latest'
+        run: echo "RUSTFLAGS=-C target-feature=+crt-static" >> $GITHUB_ENV
+
+      # This official action handles the actual build command
+      # and packages the results into a GitHub Draft Release.
+      - name: Build and Package Tauri App
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tagName: app-v0.1.0
+          releaseName: 'Robot Shooting Game v0.1.0'
+          releaseBody: 'Automated build generated via GitHub Actions.'
+          releaseDraft: true
+          prerelease: false
+          
+
+====================================================================
+FILE: tauri.conf.json
+
+{
+  "productName": "Robot Shooting Game",
+  "version": "0.1.0",
+  "identifier": "com.robotgame.dev",
+  "build": {
+    "beforeDevCommand": "",
+    "beforeBuildCommand": "",
+    "devUrl": "http://localhost:1420",
+    "frontendDist": "../src"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "Robot Shooting Game",
+        "width": 1024,
+        "height": 768,
+        "resizable": true,
+        "fullscreen": false
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ]
+  }
+}
+
+
+====================================================================
+FILE: .gitignore
+
+# Operating System files
+.DS_Store
+Thumbs.db
+
+# Developer environment / IDEs
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+
+# Local log files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Crash dumps
+drwtsn32.log
+orig.dump
+
+
