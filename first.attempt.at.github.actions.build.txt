@@ -1,0 +1,158 @@
+
+We are going to hand this to Gemini, same chat where we started with Gemini.
+
+GitHub Actions failed, both Windows and Linux.
+=======================================================================
+Linux build: (at Install Linux Dependencies)
+
+The Actions Error Log:
+
+E: Unable to locate package libwebkit2gtk-4.0-dev
+E: Couldn't find any package by glob 'libwebkit2gtk-4.0-dev'
+E: Couldn't find any package by regex 'libwebkit2gtk-4.0-dev'
+Error: Process completed with exit code 100.
+
+=======================================================================
+Windows build: (at Generate Tauri Boilerplate)
+
+The Actions Error Log:
+
+Run npm init -y
+Wrote to D:\a\tauri.robot.shooting.game\tauri.robot.shooting.game\package.json:
+
+{
+  "name": "tauri.robot.shooting.game",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": ""
+}
+
+
+
+
+added 2 packages, and audited 3 packages in 2s
+
+1 package is looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+error: unexpected argument '--dist-dir' found
+
+Usage: npm run npx init <--ci|--force|--log|--directory <DIRECTORY>|--tauri-path <TAURI_PATH>|--app-name <APP_NAME>|--window-title <WINDOW_TITLE>|--frontend-dist <FRONTEND_DIST>|--dev-url <DEV_URL>|--before-dev-command <BEFORE_DEV_COMMAND>|--before-build-command <BEFORE_BUILD_COMMAND>>
+
+For more information, try '--help'.
+Error: Process completed with exit code 2.
+
+
+
+Gemini came back with it made a mistake, so it gives us updated content
+for build.yml. See below.
+
+NEW build.yml file contents:
+
+#======start of new build.yml, dont copy this line================
+name: "Build and Release Tauri App"
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch: 
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [ubuntu-latest, windows-latest]
+
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+
+      # UPDATED: Using libwebkit2gtk-4.1-dev and libayatana-appindicator3-dev for Ubuntu 24.04 / Tauri v2
+      - name: Install Linux dependencies
+        if: matrix.platform == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libayatana-appindicator3-dev librsvg2-dev patchelf
+
+      # UPDATED: Using the correct Tauri v2 CLI flags (--frontend-dist and --dev-url)
+      - name: Generate Tauri Boilerplate
+        shell: bash
+        run: |
+          npm init -y
+          npm install @tauri-apps/cli
+          npm pkg set scripts.tauri="tauri"
+          npx tauri init --app-name robot-shooting-game --window-title "Robot Shooting Game" --frontend-dist "../src" --dev-url "http://localhost:1420"
+          cp tauri.conf.json src-tauri/tauri.conf.json
+
+      - name: Set Windows Rust Flags
+        if: matrix.platform == 'windows-latest'
+        run: echo "RUSTFLAGS=-C target-feature=+crt-static" >> $GITHUB_ENV
+
+      - name: Build and Package Tauri App
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tagName: app-v0.1.0
+          releaseName: 'Robot Shooting Game v0.1.0'
+          releaseBody: 'Automated build generated via GitHub Actions.'
+          releaseDraft: true
+          prerelease: false
+#======end of new build.yml, dont copy this line================
+
+
+
+===================OUR PROJECT==============================
+.
+├── a.i.prompts.for.part.2.txt
+├── a.i.prompts.part.1.txt
+├── a.i.prompts.part.3.txt
+├── first.actions.build.attempt.failed.txt
+├── .github
+│   └── workflows
+│       └── build.yml  <-WE ARE UPDATING THIS FILE<<<<<<<<<
+├── .gitignore
+├── src
+│   ├── Mouse-Cursor-Pointer.svg
+│   ├── robot.game.css
+│   ├── robot.game.helper.functions.js
+│   ├── robot.game.html
+│   ├── robot.game.modal.functions.js
+│   ├── robot.game.player.functions.js
+│   ├── robot.game.robot.functions.js
+│   └── robot.game.sound.js
+└── tauri.conf.json
+
+
+After we replace with new content, we have
+to do git commands so that we can sync our
+local changes with GitHub, and that will
+fire off a new Actions build.
+
+$ git status
+
+$ git add .
+
+$ git commit --message 'updated build.yml'
+
+$ git push
+
+Then we go check GitHub Actions again.
+

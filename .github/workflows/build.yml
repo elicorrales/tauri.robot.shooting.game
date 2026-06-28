@@ -38,7 +38,7 @@ jobs:
           npm install @tauri-apps/cli
           npm pkg set scripts.tauri="tauri"
           npx tauri init --app-name robot-shooting-game --window-title "Robot Shooting Game" --frontend-dist "../src" --dev-url "http://localhost:1420"
-          cp tauri.conf.json src-tauri/tauri.conf.json
+          mv tauri.conf.json src-tauri/tauri.conf.json
 
       - name: Set Windows Rust Flags
         if: matrix.platform == 'windows-latest'
